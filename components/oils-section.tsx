@@ -115,7 +115,7 @@ export function OilsSection() {
     const message = encodeURIComponent(
       `Hola! Me interesa el aceite esencial "${oil.name}" de Sefirots 30ml. Me gustaria conocer disponibilidad y opciones de envio.`
     )
-    window.open(`https://wa.me/5215512345678?text=${message}`, "_blank")
+    window.open(`https://wa.me/525530702640?text=${message}`, "_blank")
   }
 
   return (

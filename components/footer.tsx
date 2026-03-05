@@ -51,12 +51,12 @@ export function Footer() {
             </p>
             <div className="flex flex-col gap-3">
               <a
-                href="https://wa.me/5215512345678"
+                href="https://wa.me/525530702640"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-mono text-sm text-background/70 hover:text-background transition-colors"
               >
-                WhatsApp
+                +52 55 3070 2640
               </a>
               <a
                 href="mailto:contacto@sefirots.com"

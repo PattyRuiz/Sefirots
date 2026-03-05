@@ -40,7 +40,7 @@ export function CartDrawer() {
     const message = `Hola! Me gustaria ordenar:\n\n${itemsList}\n\nEnvio: ${selectedShipping} ($${shippingCost} MXN)\nTotal envio: $${shippingCost} MXN\n${address ? `Direccion: ${address}` : ""}\n\nGracias!`
 
     const encoded = encodeURIComponent(message)
-    window.open(`https://wa.me/5215512345678?text=${encoded}`, "_blank")
+    window.open(`https://wa.me/525530702640?text=${encoded}`, "_blank")
   }
 
   if (!isCartOpen) return null
