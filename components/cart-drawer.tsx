@@ -4,17 +4,8 @@ import { X, Plus, Minus, Trash2, MessageCircle } from "lucide-react"
 import { useCart } from "@/components/cart-provider"
 import { useState } from "react"
 
-const SHIPPING_RATES: Record<string, number> = {
-  CDMX: 99,
-  "Estado de Mexico": 120,
-  Jalisco: 150,
-  "Nuevo Leon": 150,
-  Puebla: 130,
-  Queretaro: 130,
-  Guanajuato: 140,
-  Nacional: 180,
-  Express: 250,
-}
+const STANDARD_SHIPPING = 180
+const FREE_SHIPPING_THRESHOLD = 2500
 
 export function CartDrawer() {
   const {
@@ -27,17 +18,24 @@ export function CartDrawer() {
     setIsCartOpen,
   } = useCart()
 
-  const [selectedShipping, setSelectedShipping] = useState("Nacional")
   const [address, setAddress] = useState("")
 
-  const shippingCost = SHIPPING_RATES[selectedShipping] || 180
+  // Calculate subtotal from items (assuming each item is $350 MXN)
+  const PRICE_PER_ITEM = 350
+  const subtotal = items.reduce((sum, item) => sum + item.quantity * PRICE_PER_ITEM, 0)
+  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD
+  const shippingCost = isFreeShipping ? 0 : STANDARD_SHIPPING
 
   const generateWhatsAppMessage = () => {
     const itemsList = items
       .map((item) => `- ${item.name} x${item.quantity}`)
       .join("\n")
 
-    const message = `Hola! Me gustaria ordenar:\n\n${itemsList}\n\nEnvio: ${selectedShipping} ($${shippingCost} MXN)\nTotal envio: $${shippingCost} MXN\n${address ? `Direccion: ${address}` : ""}\n\nGracias!`
+    const shippingText = isFreeShipping 
+      ? "Envio: GRATIS (compra mayor a $2500 MXN)" 
+      : `Envio: $${shippingCost} MXN`
+
+    const message = `Hola! Me gustaria ordenar:\n\n${itemsList}\n\nSubtotal: $${subtotal} MXN\n${shippingText}\n${address ? `Direccion: ${address}` : ""}\n\nGracias!`
 
     const encoded = encodeURIComponent(message)
     window.open(`https://wa.me/5215512345678?text=${encoded}`, "_blank")
@@ -141,22 +139,17 @@ export function CartDrawer() {
         {/* Shipping & Checkout */}
         {items.length > 0 && (
           <div className="border-t border-border px-6 py-5 flex flex-col gap-4">
-            {/* Shipping selector */}
-            <div>
-              <label className="font-mono text-xs tracking-wide text-muted-foreground block mb-2">
-                Envio
-              </label>
-              <select
-                value={selectedShipping}
-                onChange={(e) => setSelectedShipping(e.target.value)}
-                className="w-full rounded-lg border border-border bg-secondary/50 px-4 py-2.5 font-mono text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                {Object.entries(SHIPPING_RATES).map(([region, price]) => (
-                  <option key={region} value={region}>
-                    {region} - ${price} MXN
-                  </option>
-                ))}
-              </select>
+            {/* Free shipping message */}
+            <div className="bg-primary/10 rounded-lg p-3 text-center">
+              {isFreeShipping ? (
+                <p className="font-mono text-sm text-primary font-medium">
+                  ¡Felicidades! Tu envío es GRATIS
+                </p>
+              ) : (
+                <p className="font-mono text-xs text-muted-foreground">
+                  Envío gratis en compras mayores a $2,500 MXN
+                </p>
+              )}
             </div>
 
             {/* Address */}
@@ -174,17 +167,35 @@ export function CartDrawer() {
             </div>
 
             {/* Summary */}
-            <div className="flex items-center justify-between pt-2 border-t border-border/50">
-              <span className="font-mono text-xs text-muted-foreground">
-                Envio estimado
-              </span>
-              <span className="font-mono text-sm font-medium text-foreground">
-                ${shippingCost} MXN
-              </span>
+            <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-muted-foreground">
+                  Subtotal
+                </span>
+                <span className="font-mono text-sm font-medium text-foreground">
+                  ${subtotal.toLocaleString()} MXN
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-muted-foreground">
+                  Envío
+                </span>
+                <span className={`font-mono text-sm font-medium ${isFreeShipping ? 'text-primary' : 'text-foreground'}`}>
+                  {isFreeShipping ? 'GRATIS' : `$${shippingCost} MXN`}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                <span className="font-mono text-sm font-semibold text-foreground">
+                  Total
+                </span>
+                <span className="font-mono text-base font-bold text-foreground">
+                  ${(subtotal + shippingCost).toLocaleString()} MXN
+                </span>
+              </div>
             </div>
 
             <p className="font-mono text-xs text-muted-foreground text-center">
-              Consulta disponibilidad y precio final por WhatsApp
+              Confirma tu pedido y precio final por WhatsApp
             </p>
 
             {/* WhatsApp button */}
